@@ -1,667 +1,889 @@
-<!-- FIREBASE SDKs (Versione Compat) -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<!DOCTYPE html>
+<html lang="it" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impero Romano Full RP | Bit Vehicles Store</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter, Rajdhani & Cinzel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome per icone -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- FIREBASE SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
 
-<!-- JAVASCRIPT & FIREBASE SYNC -->
-<script>
-    // Configurazione Firebase ufficiale del tuo progetto
-    const firebaseConfig = {
-        apiKey: "AIzaSyC6NE1BJULbSMUNAzhpKyvqtekwbwoAV4c",
-        authDomain: "impero-romano-rp.firebaseapp.com",
-        databaseURL: "https://impero-romano-rp-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "impero-romano-rp",
-        storageBucket: "impero-romano-rp.firebasestorage.app",
-        messagingSenderId: "665352248621",
-        appId: "1:665352248621:web:bb61b4b3625e38299f47a4",
-        measurementId: "G-2ZJW8CD3W0"
-    };
-
-    // Inizializzazione Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    const SESSION_AUTH_KEY = 'impero_romano_admin_logged_in';
-
-    const defaultSettings = {
-        serverName: 'IMPERO ROMANO FULL RP',
-        heroTitle: "DOMINA L'ASFALTO DI ROMA",
-        heroSubtitle: "Oltre 300 km/h tra il Colosseo e il Grande Raccordo Anulare. Scegli la tua fuoriserie esclusiva Bit, lascia il segno sull'asfalto della Capitale e imponi la tua legge.",
-        heroBg: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=1920&q=85',
-        logoUrl: './0EB05BAC-3C6B-4503-BA2E-C8E0FF6D9350.png',
-        discordUrl: 'https://discord.com',
-        accentHex: '#f59e0b',
-        adminUser: 'admin',
-        adminPass: 'roma2026'
-    };
-
-    const defaultVehicles = [
-        {
-            id: 'v1',
-            name: 'Grotti Centurione V12 SPQR',
-            price: '3.500 Bit',
-            description: 'Hypercar italiana V12 aspirata in edizione limitata Impero Romano. Aerodinamica attiva in carbonio forgiato, sound scarico da pista e livrea oro/porpora dedicata.',
-            image: 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=900&q=80',
-            imgHeight: 240,
-            imgFit: 'cover'
-        },
-        {
-            id: 'v2',
-            name: 'Lampadati Tiberina GT Widebody',
-            price: '2.400 Bit',
-            description: 'Coupé sportiva preparata nei migliori garage della Capitale. Assetto ribassato, scarico in titanio con fiammate custom e oltre 40 modifiche estetiche.',
-            image: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=900&q=80',
-            imgHeight: 240,
-            imgFit: 'cover'
-        },
-        {
-            id: 'v3',
-            name: 'Principe Gladiatore 1000 RR',
-            price: '1.800 Bit',
-            description: 'Superbike da competizione ultra-leggera, ideale per tagliare il traffico del centro storico di Roma con accelerazione bruciante.',
-            image: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=900&q=80',
-            imgHeight: 240,
-            imgFit: 'cover'
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Rajdhani', 'sans-serif'],
+                        roman: ['Cinzel', 'serif'],
+                    },
+                    colors: {
+                        darkBg: '#090606',
+                        cardBg: '#140c0d',
+                        cardHover: '#1f1214',
+                    }
+                }
+            }
         }
-    ];
+    </script>
+    <style id="dynamic-accent-style">
+        .accent-text { color: #f59e0b !important; }
+        .accent-bg { background-color: #f59e0b !important; }
+        .accent-border { border-color: #f59e0b !important; }
+    </style>
+    <style>
+        @keyframes slowZoom {
+            0% { transform: scale(1.0); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1.0); }
+        }
+        .animate-hero-bg {
+            animation: slowZoom 22s ease-in-out infinite;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.25); }
+            50% { box-shadow: 0 0 45px rgba(220, 38, 38, 0.45); }
+        }
+        .glow-emblem {
+            animation: pulseGlow 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-darkBg text-gray-100 font-sans antialiased selection:bg-amber-500 selection:text-black overflow-x-hidden">
 
-    let vehicles = [];
-    let settings = {};
-    let activeModalVehicle = null;
-    let isAdminLoggedIn = false;
-    let isViewingAdminWorkspace = false;
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-[60] flex flex-col gap-2 pointer-events-none"></div>
 
-    document.addEventListener('DOMContentLoaded', () => {
-        loadDataFromFirebase();
-        checkAuthSession();
-    });
+    <!-- Rotellina Admin Nascosta in basso a sinistra -->
+    <button id="secret-admin-trigger" onclick="handleSecretGearClick()" title="Accesso Riservato Staff" class="fixed bottom-4 left-4 z-50 w-9 h-9 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 text-gray-400 hover:text-amber-400 opacity-15 hover:opacity-100 transition-all duration-300 flex items-center justify-center backdrop-blur-sm cursor-pointer">
+        <i class="fa-solid fa-gear text-sm"></i>
+    </button>
 
-    // Ascolta in tempo reale i dati da Firebase Realtime Database
-    function loadDataFromFirebase() {
-        db.ref('store/settings').on('value', (snapshot) => {
-            const val = snapshot.val();
-            settings = val ? { ...defaultSettings, ...val } : { ...defaultSettings };
-            applySettingsToUI();
+    <!-- MODALE LOGIN ADMIN -->
+    <div id="admin-login-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/85 backdrop-blur-md p-4">
+        <div class="bg-cardBg border border-amber-500/40 rounded-3xl p-8 max-w-md w-full shadow-2xl relative">
+            <button onclick="closeAdminLoginModal()" class="absolute top-5 right-5 text-gray-400 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/40 mx-auto flex items-center justify-center text-amber-400 text-xl mb-3 shadow-inner">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <h3 class="font-roman text-2xl font-bold text-white uppercase">Area Riservata Staff</h3>
+                <p class="text-xs text-gray-400 mt-1">Inserisci le credenziali di accesso per gestire il database Bit.</p>
+            </div>
+
+            <form onsubmit="submitAdminLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Username Admin</label>
+                    <input type="text" id="login-user" required class="w-full bg-darkBg border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500" placeholder="Username">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Password Segreta</label>
+                    <input type="password" id="login-pass" required class="w-full bg-darkBg border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500" placeholder="Password">
+                </div>
+                <button type="submit" class="w-full accent-bg bg-amber-500 hover:opacity-95 text-black font-extrabold uppercase tracking-wider py-3.5 rounded-xl text-sm transition shadow-lg cursor-pointer mt-2">
+                    Accedi al Pannello
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- VISTA 1: SITO PUBBLICO -->
+    <div id="public-site-view">
+        <header class="sticky top-0 z-30 bg-darkBg/90 backdrop-blur-md border-b border-amber-500/20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-24">
+                    <div class="flex items-center gap-3.5 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                        <div class="w-14 h-16 rounded-xl bg-gradient-to-b from-red-950/60 to-black/80 border border-amber-500/40 flex items-center justify-center shadow-lg shadow-amber-500/15 overflow-hidden p-0.5 shrink-0">
+                            <img id="nav-logo-img" src="./0EB05BAC-3C6B-4503-BA2E-C8E0FF6D9350.png" onerror="this.src='https://placehold.co/200x200/160d0e/f59e0b?text=SPQR'" alt="Logo Server" class="w-full h-full object-contain">
+                        </div>
+                        <div>
+                            <span id="nav-server-name" class="font-roman font-bold text-xl sm:text-2xl tracking-wider uppercase text-white">IMPERO ROMANO <span class="accent-text text-amber-400">FULL RP</span></span>
+                            <p class="text-[11px] text-amber-200/70 tracking-widest uppercase -mt-0.5">Concessionario Ufficiale Bit • Roma</p>
+                        </div>
+                    </div>
+
+                    <nav class="hidden md:flex items-center gap-8 text-sm font-semibold uppercase tracking-wider text-gray-300">
+                        <a href="#home" class="hover:text-amber-400 transition-colors">Roma Home</a>
+                        <a href="#catalogo" class="hover:text-amber-400 transition-colors">Flotta Bit</a>
+                    </nav>
+
+                    <div class="flex items-center gap-3">
+                        <button id="return-admin-btn" onclick="openAdminWorkspace()" class="hidden items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold bg-red-600/20 border border-red-500/50 text-red-300 hover:bg-red-600/30 transition cursor-pointer">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <span>Torna ad Admin</span>
+                        </button>
+                        <a id="header-discord-link" href="https://discord.com" target="_blank" rel="noopener noreferrer" class="accent-bg bg-amber-500 hover:opacity-90 text-black font-bold px-5 py-2.5 rounded-xl text-sm transition-all flex items-center gap-2 shadow-lg shadow-amber-500/20">
+                            <i class="fa-brands fa-discord text-base"></i>
+                            <span>Discord Impero Romano</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- HERO SECTION -->
+        <section id="home" class="relative min-h-[680px] flex items-center justify-center overflow-hidden border-b border-amber-500/25">
+            <div id="hero-bg-image" class="absolute inset-0 bg-cover bg-center animate-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=1920&q=85');"></div>
+            
+            <div class="absolute inset-0 bg-gradient-to-t from-darkBg via-darkBg/75 to-red-950/65"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-darkBg via-transparent to-darkBg"></div>
+
+            <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center flex flex-col items-center">
+                <div class="w-36 h-44 sm:w-44 sm:h-52 mb-7 rounded-2xl bg-gradient-to-b from-red-950/80 to-black/95 border border-amber-500/50 p-2 backdrop-blur-md flex items-center justify-center overflow-hidden glow-emblem">
+                    <img id="hero-logo-img" src="./0EB05BAC-3C6B-4503-BA2E-C8E0FF6D9350.png" onerror="this.src='https://placehold.co/300x350/160d0e/f59e0b?text=SPQR'" alt="Logo Server" class="w-full h-full object-contain drop-shadow-[0_0_20px_rgba(245,158,11,0.5)]">
+                </div>
+
+                <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-red-950/80 border border-red-500/40 backdrop-blur-md mb-6 shadow-lg">
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                    <span class="text-xs font-bold uppercase tracking-[0.2em] text-amber-300">Motori Ruggenti • Edizioni Limitate Bit • Roma</span>
+                </div>
+
+                <h1 id="hero-title-display" class="font-roman font-black text-4xl sm:text-6xl lg:text-7xl uppercase tracking-tight text-white leading-[1.05] mb-6 drop-shadow-[0_5px_25px_rgba(0,0,0,0.9)]">
+                    DOMINA L'ASFALTO DI ROMA
+                </h1>
+
+                <p id="hero-subtitle-display" class="max-w-2xl mx-auto text-base sm:text-xl text-gray-200 font-light leading-relaxed mb-10 drop-shadow">
+                    Oltre 300 km/h tra il Colosseo e il Grande Raccordo Anulare. Scegli la tua fuoriserie esclusiva Bit, lascia il segno sull'asfalto della Capitale e imponi la tua legge.
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
+                    <a href="#catalogo" class="w-full sm:w-auto accent-bg bg-amber-500 hover:opacity-95 hover:scale-105 text-black font-extrabold uppercase tracking-wider px-9 py-4 rounded-2xl text-sm sm:text-base transition-all shadow-[0_0_30px_rgba(245,158,11,0.35)] flex items-center justify-center gap-2.5">
+                        <i class="fa-solid fa-fire-flame-curved"></i>
+                        <span>Scopri la Flotta Bit</span>
+                    </a>
+                    <a id="hero-discord-btn" href="https://discord.com" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-8 py-4 rounded-2xl text-sm sm:text-base font-bold uppercase tracking-wider bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md text-white transition-all flex items-center justify-center gap-2.5">
+                        <i class="fa-brands fa-discord text-lg text-indigo-400"></i>
+                        <span>Discord Impero Romano</span>
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 sm:gap-10 mt-14 pt-8 border-t border-white/10 w-full max-w-2xl text-center">
+                    <div>
+                        <span class="block font-display font-bold text-2xl sm:text-3xl accent-text text-amber-400">350+ KM/H</span>
+                        <span class="text-[11px] uppercase tracking-widest text-gray-400">Velocità Pura</span>
+                    </div>
+                    <div class="border-x border-white/10">
+                        <span class="block font-display font-bold text-2xl sm:text-3xl text-white">1 OF 1</span>
+                        <span class="text-[11px] uppercase tracking-widest text-gray-400">Import Esclusivi</span>
+                    </div>
+                    <div>
+                        <span class="block font-display font-bold text-2xl sm:text-3xl text-red-500">CUSTOM</span>
+                        <span class="text-[11px] uppercase tracking-widest text-gray-400">Sound & Tuning</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CATALOGO -->
+        <main id="catalogo" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-[0.2em] accent-text text-amber-400">Showroom Esclusivo • Roma Capitale</span>
+                    <h2 class="font-roman font-bold text-3xl sm:text-5xl text-white uppercase mt-1">Catalogo Veicoli Bit</h2>
+                </div>
+                <div class="relative w-full sm:w-80">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text" id="search-input" oninput="renderVehicles()" placeholder="Cerca modello o parola chiave..." class="w-full bg-cardBg border border-amber-500/25 rounded-xl pl-11 pr-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+            </div>
+
+            <div id="vehicles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7"></div>
+
+            <div id="empty-state" class="hidden text-center py-20 bg-cardBg rounded-3xl border border-white/10">
+                <i class="fa-solid fa-car-tunnel text-4xl text-gray-600 mb-3"></i>
+                <h3 class="font-display text-xl font-bold text-white">Nessun veicolo trovato</h3>
+                <p class="text-sm text-gray-400 mt-1">Al momento non ci sono mezzi disponibili con questo criterio di ricerca.</p>
+            </div>
+        </main>
+
+        <footer class="border-t border-amber-500/20 py-8 text-center text-xs text-gray-500">
+            <div class="max-w-7xl mx-auto px-4">
+                <p id="footer-text">© 2026 Impero Romano Full RP - Concessionario Ufficiale Bit Roma. Non affiliato con Rockstar Games o Take-Two Interactive.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- VISTA 2: ADMIN WORKSPACE -->
+    <div id="admin-workspace-view" class="hidden min-h-screen bg-[#070505] text-gray-100">
+        <header class="sticky top-0 z-40 bg-cardBg/95 backdrop-blur-md border-b border-amber-500/30 shadow-xl">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl accent-bg bg-amber-500 text-black flex items-center justify-center font-bold text-lg shadow-md">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-widest accent-text text-amber-400 block">Modalità Gestione Cloud (Firebase)</span>
+                        <h1 class="font-roman font-bold text-lg sm:text-xl text-white">Pannello Controllo Impero Romano</h1>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <button onclick="switchToPublicPreview()" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-xs sm:text-sm font-semibold text-white flex items-center gap-2 transition cursor-pointer">
+                        <i class="fa-solid fa-eye text-amber-400"></i>
+                        <span>Vedi Sito Cittadini</span>
+                    </button>
+                    <button onclick="logoutAdmin()" class="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-xs sm:text-sm font-bold text-white flex items-center gap-2 transition shadow-lg cursor-pointer">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span class="hidden sm:inline">Esci da Admin</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="switchAdminTab('tab-vehicles')" id="btn-tab-vehicles" class="admin-tab-btn px-5 py-2.5 rounded-xl text-sm font-bold accent-bg bg-amber-500 text-black transition cursor-pointer">
+                        <i class="fa-solid fa-car mr-1.5"></i> Gestione Mezzi
+                    </button>
+                    <button onclick="switchAdminTab('tab-home')" id="btn-tab-home" class="admin-tab-btn px-5 py-2.5 rounded-xl text-sm font-semibold bg-cardBg border border-white/10 text-gray-300 hover:bg-white/10 transition cursor-pointer">
+                        <i class="fa-solid fa-sliders mr-1.5"></i> Impostazioni Sito & Discord
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button onclick="exportStoreData()" class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-gray-300 flex items-center gap-1.5 transition cursor-pointer">
+                        <i class="fa-solid fa-download"></i> Esporta Backup
+                    </button>
+                    <button onclick="resetDefaultData()" class="px-3.5 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-xs font-medium text-red-400 flex items-center gap-1.5 transition cursor-pointer">
+                        <i class="fa-solid fa-rotate-left"></i> Reset Cloud
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 1: GESTIONE MEZZI -->
+            <div id="tab-vehicles" class="mt-8 space-y-10">
+                <form id="vehicle-form" onsubmit="handleSaveVehicle(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-cardBg p-6 sm:p-8 rounded-3xl border border-white/10 shadow-xl">
+                    <input type="hidden" id="edit-vehicle-id" value="">
+                    
+                    <div class="lg:col-span-7 space-y-5">
+                        <h2 id="form-vehicle-title" class="font-roman text-2xl font-bold text-white flex items-center gap-2.5">
+                            <i class="fa-solid fa-plus-circle accent-text text-amber-400"></i> Aggiungi Nuovo Mezzo
+                        </h2>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Modello Veicolo *</label>
+                                <input type="text" id="v-name" required placeholder="es. Grotti Centurione V12" class="w-full bg-darkBg border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Prezzo *</label>
+                                <input type="text" id="v-price" required placeholder="es. 3.500 Bit / 25€" class="w-full bg-darkBg border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Descrizione *</label>
+                            <textarea id="v-desc" rows="4" required placeholder="Inserisci la descrizione del mezzo..." class="w-full bg-darkBg border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500"></textarea>
+                        </div>
+
+                        <div class="bg-darkBg/80 p-4 rounded-2xl border border-amber-500/20 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs font-bold uppercase tracking-wider text-amber-400">
+                                    <i class="fa-solid fa-up-right-and-down-left-from-center mr-1"></i> Grandezza & Formato Foto nella Card
+                                </label>
+                                <span id="v-height-label" class="text-xs font-mono font-bold text-white bg-white/10 px-2.5 py-0.5 rounded-lg">240 px</span>
+                            </div>
+                            <input type="range" id="v-img-height" min="140" max="550" step="10" value="240" oninput="updatePreviewImageSize()" class="w-full accent-amber-500 cursor-pointer">
+                            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                                <span class="text-[11px] text-gray-400">Adattamento immagine:</span>
+                                <div class="flex gap-2">
+                                    <label class="inline-flex items-center gap-1.5 text-xs text-gray-200 cursor-pointer bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
+                                        <input type="radio" name="v-img-fit" value="cover" checked onchange="updatePreviewImageSize()" class="accent-amber-500">
+                                        <span>Riempi (Cover)</span>
+                                    </label>
+                                    <label class="inline-flex items-center gap-1.5 text-xs text-gray-200 cursor-pointer bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
+                                        <input type="radio" name="v-img-fit" value="contain" onchange="updatePreviewImageSize()" class="accent-amber-500">
+                                        <span>Intera senza tagli (Contain)</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-5 flex flex-col justify-between bg-darkBg p-5 rounded-2xl border border-white/10">
+                        <div class="space-y-4">
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400">Foto del Mezzo (Anteprima Reale)</label>
+                            
+                            <div id="v-preview-box" style="height: 240px;" class="relative w-full rounded-xl overflow-hidden bg-black border border-dashed border-white/25 flex items-center justify-center transition-all">
+                                <img id="v-image-preview" src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=800&q=80" alt="Anteprima" class="w-full h-full object-cover">
+                            </div>
+
+                            <div>
+                                <label class="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 cursor-pointer text-sm font-medium text-white transition">
+                                    <i class="fa-solid fa-upload accent-text text-amber-400"></i>
+                                    <span>Carica Foto dal Dispositivo</span>
+                                    <input type="file" id="v-file-input" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                                </label>
+                            </div>
+
+                            <div class="relative flex py-1 items-center">
+                                <div class="flex-grow border-t border-white/10"></div>
+                                <span class="flex-shrink mx-3 text-xs text-gray-500 uppercase">oppure link immagine</span>
+                                <div class="flex-grow border-t border-white/10"></div>
+                            </div>
+
+                            <div>
+                                <input type="text" id="v-image-url" placeholder="https://esempio.com/foto-auto.jpg" oninput="handleImageUrlInput(this.value)" class="w-full bg-cardBg border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 mt-6 pt-4 border-t border-white/10">
+                            <button type="submit" class="flex-1 accent-bg bg-amber-500 hover:opacity-90 text-black font-bold py-3.5 px-4 rounded-xl text-sm transition shadow-lg cursor-pointer">
+                                <i class="fa-solid fa-check mr-1.5"></i> <span id="btn-save-vehicle-text">Pubblica Mezzo</span>
+                            </button>
+                            <button type="button" id="btn-cancel-edit" onclick="resetVehicleForm()" class="hidden px-4 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition cursor-pointer">
+                                Annulla
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="bg-cardBg p-6 sm:p-8 rounded-3xl border border-white/10 shadow-xl">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="font-roman text-xl font-bold text-white">Mezzi Attualmente Pubblicati</h3>
+                            <p class="text-xs text-gray-400 mt-0.5">Sincronizzati in tempo reale con Firebase.</p>
+                        </div>
+                        <span id="admin-vehicle-count" class="px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-bold">0 Mezzi</span>
+                    </div>
+
+                    <div id="admin-vehicles-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+                </div>
+            </div>
+
+            <!-- TAB 2: IMPOSTAZIONI SITO -->
+            <div id="tab-home" class="hidden mt-8">
+                <form onsubmit="handleSaveHomeSettings(event)" class="grid grid-cols-1 md:grid-cols-2 gap-8 bg-cardBg p-6 sm:p-8 rounded-3xl border border-white/10 shadow-xl">
+                    <div class="space-y-5">
+                        <h3 class="font-roman text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-heading accent-text text-amber-400"></i> Titoli, Testi & Link Discord
+                        </h3>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Nome Server</label>
+                            <input type="text" id="set-server-name" class="w-full bg-darkBg border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Titolo Principale Home</label>
+                            <input type="text" id="set-hero-title" class="w-full bg-darkBg border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Descrizione Home</label>
+                            <textarea id="set-hero-subtitle" rows="3" class="w-full bg-darkBg border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Link Discord Impero Romano</label>
+                            <input type="url" id="set-discord-url" placeholder="https://discord.gg/tuoserver" class="w-full bg-darkBg border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500">
+                        </div>
+
+                        <div class="pt-4 border-t border-white/10">
+                            <h4 class="font-display text-base font-bold text-amber-400 uppercase mb-3">
+                                <i class="fa-solid fa-key mr-1"></i> Credenziali Accesso Admin
+                            </h4>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-1">Username Admin</label>
+                                    <input type="text" id="set-admin-user" class="w-full bg-darkBg border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400 mb-1">Password Admin</label>
+                                    <input type="text" id="set-admin-pass" class="w-full bg-darkBg border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-5">
+                        <h3 class="font-roman text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-shield-halved accent-text text-amber-400"></i> Logo & Sfondo Home
+                        </h3>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Logo Server</label>
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-14 h-14 rounded-xl bg-darkBg border border-white/15 p-1 flex items-center justify-center shrink-0 overflow-hidden">
+                                    <img id="admin-logo-preview" src="./0EB05BAC-3C6B-4503-BA2E-C8E0FF6D9350.png" onerror="this.src='https://placehold.co/100x100/160d0e/f59e0b?text=LOGO'" alt="Preview" class="w-full h-full object-contain">
+                                </div>
+                                <div class="flex-1 flex gap-2">
+                                    <input type="text" id="set-logo-url" oninput="document.getElementById('admin-logo-preview').src = this.value" placeholder="URL logo o carica..." class="flex-1 bg-darkBg border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                                    <label class="px-4 py-2.5 rounded-xl bg-amber-500/25 hover:bg-amber-500/35 border border-amber-500/40 cursor-pointer text-sm font-medium text-amber-300 flex items-center justify-center transition shrink-0">
+                                        <i class="fa-solid fa-upload mr-1.5"></i> Scegli
+                                        <input type="file" accept="image/*" class="hidden" onchange="handleLogoUpload(event)">
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Immagine Sfondo Home</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="set-hero-bg" placeholder="https://..." class="flex-1 bg-darkBg border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500">
+                                <label class="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 cursor-pointer text-sm font-medium text-white flex items-center justify-center transition">
+                                    <i class="fa-solid fa-image"></i>
+                                    <input type="file" accept="image/*" class="hidden" onchange="handleHeroBgUpload(event)">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Colore Tema Principale</label>
+                            <div class="flex items-center gap-3">
+                                <button type="button" onclick="selectAccentColor('#f59e0b')" class="w-10 h-10 rounded-full bg-amber-500 border-2 border-white hover:scale-110 transition cursor-pointer" title="Oro"></button>
+                                <button type="button" onclick="selectAccentColor('#dc2626')" class="w-10 h-10 rounded-full bg-red-600 border-2 border-white/40 hover:scale-110 transition cursor-pointer" title="Rosso"></button>
+                                <button type="button" onclick="selectAccentColor('#06b6d4')" class="w-10 h-10 rounded-full bg-cyan-500 border-2 border-white/40 hover:scale-110 transition cursor-pointer" title="Ciano"></button>
+                                <button type="button" onclick="selectAccentColor('#10b981')" class="w-10 h-10 rounded-full bg-emerald-500 border-2 border-white/40 hover:scale-110 transition cursor-pointer" title="Smeraldo"></button>
+                                <button type="button" onclick="selectAccentColor('#a855f7')" class="w-10 h-10 rounded-full bg-purple-500 border-2 border-white/40 hover:scale-110 transition cursor-pointer" title="Viola"></button>
+                                <input type="hidden" id="set-accent-color" value="#f59e0b">
+                            </div>
+                        </div>
+
+                        <div class="pt-6">
+                            <button type="submit" class="w-full accent-bg bg-amber-500 hover:opacity-95 text-black font-extrabold uppercase tracking-wider py-4 rounded-xl text-sm transition shadow-lg cursor-pointer">
+                                Salva Modifiche Sito in Cloud
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT LOGICA E FIREBASE -->
+    <script>
+        // CONFIGURAZIONE FIREBASE UFFICIALE (impero-romano-rp)
+        const firebaseConfig = {
+            apiKey: "AIzaSyC6NE1BJULbSMUNAzhpKyvqtekwbwoAV4c",
+            authDomain: "impero-romano-rp.firebaseapp.com",
+            databaseURL: "https://impero-romano-rp-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "impero-romano-rp",
+            storageBucket: "impero-romano-rp.firebasestorage.app",
+            messagingSenderId: "665352248621",
+            appId: "1:665352248621:web:bb61b4b3625e38299f47a4",
+            measurementId: "G-2ZJW8CD3W0"
+        };
+
+        // Inizializzazione Firebase e Analytics
+        let db;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            if (typeof firebase.analytics === 'function') {
+                firebase.analytics();
+            }
+        } catch(e) {
+            console.warn("Errore inizializzazione Firebase:", e);
+        }
+
+        // DATI DI DEFAULT
+        const defaultSettings = {
+            serverName: "IMPERO ROMANO FULL RP",
+            heroTitle: "DOMINA L'ASFALTO DI ROMA",
+            heroSubtitle: "Oltre 300 km/h tra il Colosseo e il Grande Raccordo Anulare. Scegli la tua fuoriserie esclusiva Bit, lascia il segno sull'asfalto della Capitale e imponi la tua legge.",
+            discordUrl: "https://discord.com",
+            logoUrl: "./0EB05BAC-3C6B-4503-BA2E-C8E0FF6D9350.png",
+            heroBg: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=1920&q=85",
+            accentColor: "#f59e0b",
+            adminUser: "admin",
+            adminPass: "roma2026"
+        };
+
+        const defaultVehicles = {
+            "v1": {
+                id: "v1",
+                name: "Grotti Centurione V12",
+                price: "4.500 Bit / 30€",
+                description: "Hypercar biturbo progettata per sfrecciare sui lungotevere e dominare ogni inseguimento nella Capitale.",
+                imageUrl: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=800&q=80",
+                imageHeight: "240",
+                imageFit: "cover"
+            },
+            "v2": {
+                id: "v2",
+                name: "Pegassi Gladiator SPQR",
+                price: "3.200 Bit / 20€",
+                description: "Supercar aggressiva con livrea personalizzata Impero Romano e scarichi modificati per un sound inconfondibile.",
+                imageUrl: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80",
+                imageHeight: "240",
+                imageFit: "cover"
+            },
+            "v3": {
+                id: "v3",
+                name: "Pfister Centurion GT",
+                price: "2.800 Bit / 15€",
+                description: "Gran Turismo tedesca importata a Roma, ideale per viaggi ad altissima velocità sul GRA e stabilità eccezionale.",
+                imageUrl: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80",
+                imageHeight: "240",
+                imageFit: "cover"
+            }
+        };
+
+        // STATO GLOBALE
+        let appData = {
+            settings: { ...defaultSettings },
+            vehicles: { ...defaultVehicles }
+        };
+
+        let isAdminLoggedIn = false;
+
+        // INIZIALIZZAZIONE APP
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDataFromCloudOrLocal();
         });
 
-        db.ref('store/vehicles').on('value', (snapshot) => {
-            const val = snapshot.val();
-            if (val) {
-                vehicles = Object.keys(val).map(key => ({ id: key, ...val[key] }));
+        function loadDataFromCloudOrLocal() {
+            if (db) {
+                db.ref('impero_romano_store').on('value', (snapshot) => {
+                    const val = snapshot.val();
+                    if (val) {
+                        appData.settings = { ...defaultSettings, ...(val.settings || {}) };
+                        appData.vehicles = val.vehicles || { ...defaultVehicles };
+                    } else {
+                        saveDataToCloud();
+                    }
+                    applyAppSettings();
+                    renderVehicles();
+                    renderAdminVehicles();
+                }, (error) => {
+                    console.error("Errore lettura Firebase:", error);
+                    loadLocalFallback();
+                });
             } else {
-                vehicles = [...defaultVehicles];
+                loadLocalFallback();
             }
+        }
+
+        function loadLocalFallback() {
+            const localData = localStorage.getItem('impero_romano_store_data');
+            if (localData) {
+                try {
+                    appData = JSON.parse(localData);
+                } catch(e) {}
+            }
+            applyAppSettings();
             renderVehicles();
-            renderAdminVehiclesList();
-        });
-    }
+            renderAdminVehicles();
+        }
 
-    function saveVehiclesToFirebase() {
-        const vehiclesObj = {};
-        vehicles.forEach(v => {
-            const id = v.id;
-            const copy = { ...v };
-            delete copy.id;
-            vehiclesObj[id] = copy;
-        });
-        db.ref('store/vehicles').set(vehiclesObj).catch(err => {
-            showToast('Errore di salvataggio su Firebase.', 'error');
-        });
-    }
-
-    function saveSettingsToFirebase() {
-        db.ref('store/settings').set(settings).catch(err => {
-            showToast('Errore salvataggio impostazioni su Firebase.', 'error');
-        });
-    }
-
-    function checkAuthSession() {
-        isAdminLoggedIn = sessionStorage.getItem(SESSION_AUTH_KEY) === 'true';
-        updateViewMode();
-    }
-
-    function updateViewMode() {
-        const publicView = document.getElementById('public-site-view');
-        const adminView = document.getElementById('admin-workspace-view');
-        const returnBtn = document.getElementById('return-admin-btn');
-        const gear = document.getElementById('secret-admin-trigger');
-
-        if (isAdminLoggedIn && isViewingAdminWorkspace) {
-            publicView.classList.add('hidden');
-            adminView.classList.remove('hidden');
-            gear.classList.add('hidden');
-            window.scrollTo({ top: 0 });
-        } else {
-            adminView.classList.add('hidden');
-            publicView.classList.remove('hidden');
-            gear.classList.remove('hidden');
-
-            if (isAdminLoggedIn) {
-                returnBtn.classList.remove('hidden');
-                returnBtn.classList.add('flex');
-                gear.classList.remove('opacity-15');
-                gear.classList.add('opacity-90', 'text-amber-400', 'border-amber-500/40');
+        function saveDataToCloud() {
+            if (db) {
+                db.ref('impero_romano_store').set(appData).then(() => {
+                    showToast("Modifiche salvate con successo in Cloud!");
+                }).catch((err) => {
+                    showToast("Errore salvataggio Cloud", "error");
+                });
             } else {
-                returnBtn.classList.add('hidden');
-                returnBtn.classList.remove('flex');
-                gear.classList.add('opacity-15');
-                gear.classList.remove('opacity-90', 'text-amber-400', 'border-amber-500/40');
+                localStorage.setItem('impero_romano_store_data', JSON.stringify(appData));
+                showToast("Modifiche salvate in locale!");
             }
-        }
-    }
-
-    function openAdminWorkspace() {
-        if (!isAdminLoggedIn) {
-            openLoginModal();
-            return;
-        }
-        isViewingAdminWorkspace = true;
-        renderAdminVehiclesList();
-        updateViewMode();
-    }
-
-    function switchToPublicPreview() {
-        isViewingAdminWorkspace = false;
-        renderVehicles();
-        updateViewMode();
-    }
-
-    function handleSecretGearClick() {
-        if (isAdminLoggedIn) {
-            openAdminWorkspace();
-        } else {
-            openLoginModal();
-        }
-    }
-
-    function openLoginModal() {
-        const modal = document.getElementById('admin-login-modal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        document.getElementById('login-username').value = '';
-        document.getElementById('login-password').value = '';
-        setTimeout(() => document.getElementById('login-username').focus(), 100);
-    }
-
-    function closeLoginModal() {
-        const modal = document.getElementById('admin-login-modal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }
-
-    function handleAdminLogin(event) {
-        event.preventDefault();
-        const user = document.getElementById('login-username').value.trim();
-        const pass = document.getElementById('login-password').value;
-
-        const validUser = settings.adminUser || defaultSettings.adminUser;
-        const validPass = settings.adminPass || defaultSettings.adminPass;
-
-        if (user === validUser && pass === validPass) {
-            isAdminLoggedIn = true;
-            isViewingAdminWorkspace = true;
-            sessionStorage.setItem(SESSION_AUTH_KEY, 'true');
-            closeLoginModal();
-            renderAdminVehiclesList();
-            updateViewMode();
-            showToast('Accesso effettuato con successo!', 'success');
-        } else {
-            showToast('Credenziali errate!', 'error');
-        }
-    }
-
-    function logoutAdmin() {
-        isAdminLoggedIn = false;
-        isViewingAdminWorkspace = false;
-        sessionStorage.removeItem(SESSION_AUTH_KEY);
-        resetVehicleForm();
-        renderVehicles();
-        updateViewMode();
-        showToast('Disconnesso dall\'area Admin.', 'info');
-    }
-
-    function switchAdminTab(tabId) {
-        document.getElementById('tab-vehicles').classList.add('hidden');
-        document.getElementById('tab-home').classList.add('hidden');
-        document.getElementById(tabId).classList.remove('hidden');
-
-        document.querySelectorAll('.admin-tab-btn').forEach(btn => {
-            btn.className = 'admin-tab-btn px-5 py-2.5 rounded-xl text-sm font-semibold bg-cardBg border border-white/10 text-gray-300 hover:bg-white/10 transition cursor-pointer';
-        });
-
-        const activeBtn = tabId === 'tab-vehicles' ? document.getElementById('btn-tab-vehicles') : document.getElementById('btn-tab-home');
-        activeBtn.className = 'admin-tab-btn px-5 py-2.5 rounded-xl text-sm font-bold accent-bg bg-amber-500 text-black transition cursor-pointer';
-    }
-
-    function applySettingsToUI() {
-        if (!settings.serverName) return;
-        const nameUpper = settings.serverName.trim();
-        if (nameUpper.toUpperCase().endsWith('FULL RP')) {
-            const baseName = nameUpper.slice(0, -7).trim();
-            document.getElementById('nav-server-name').innerHTML = `${escapeHtml(baseName)} <span class="accent-text">FULL RP</span>`;
-        } else {
-            const parts = nameUpper.split(' ');
-            if (parts.length > 1) {
-                const lastWord = parts.pop();
-                document.getElementById('nav-server-name').innerHTML = `${escapeHtml(parts.join(' '))} <span class="accent-text">${escapeHtml(lastWord)}</span>`;
-            } else {
-                document.getElementById('nav-server-name').innerHTML = `<span class="accent-text">${escapeHtml(nameUpper)}</span>`;
-            }
+            applyAppSettings();
+            renderVehicles();
+            renderAdminVehicles();
         }
 
-        const logoSrc = settings.logoUrl || defaultSettings.logoUrl;
-        document.getElementById('nav-logo-img').src = logoSrc;
-        document.getElementById('hero-logo-img').src = logoSrc;
-        document.getElementById('admin-logo-preview').src = logoSrc;
+        function applyAppSettings() {
+            const s = appData.settings;
+            document.getElementById('nav-server-name').innerHTML = `${s.serverName.split(' ')[0]} <span class="accent-text">${s.serverName.split(' ').slice(1).join(' ')}</span>`;
+            document.getElementById('nav-logo-img').src = s.logoUrl;
+            document.getElementById('hero-logo-img').src = s.logoUrl;
+            document.getElementById('hero-title-display').textContent = s.heroTitle;
+            document.getElementById('hero-subtitle-display').textContent = s.heroSubtitle;
+            document.getElementById('hero-bg-image').style.backgroundImage = `url('${s.heroBg}')`;
+            document.getElementById('header-discord-link').href = s.discordUrl;
+            document.getElementById('hero-discord-btn').href = s.discordUrl;
+            
+            updateAccentColorCSS(s.accentColor || '#f59e0b');
+        }
 
-        document.getElementById('hero-title-display').textContent = settings.heroTitle;
-        document.getElementById('hero-subtitle-display').textContent = settings.heroSubtitle;
-        document.getElementById('hero-bg-image').style.backgroundImage = `url('${settings.heroBg}')`;
-        
-        const discordUrl = settings.discordUrl || 'https://discord.com';
-        document.getElementById('header-discord-link').href = discordUrl;
-        document.getElementById('hero-discord-btn').href = discordUrl;
-        document.getElementById('modal-discord-btn').href = discordUrl;
-        document.getElementById('footer-text').textContent = `© 2026 ${settings.serverName} - Concessionario Ufficiale Bit Roma.`;
-
-        document.getElementById('set-server-name').value = settings.serverName;
-        document.getElementById('set-hero-title').value = settings.heroTitle;
-        document.getElementById('set-hero-subtitle').value = settings.heroSubtitle;
-        document.getElementById('set-logo-url').value = settings.logoUrl || '';
-        document.getElementById('set-hero-bg').value = settings.heroBg;
-        document.getElementById('set-discord-url').value = settings.discordUrl;
-        document.getElementById('set-accent-hex').value = settings.accentHex;
-        document.getElementById('set-admin-user').value = settings.adminUser || defaultSettings.adminUser;
-        document.getElementById('set-admin-pass').value = settings.adminPass || defaultSettings.adminPass;
-
-        applyAccentColor(settings.accentHex);
-    }
-
-    function applyAccentColor(hex) {
-        const styleTag = document.getElementById('dynamic-accent-style');
-        if (styleTag) {
-            styleTag.innerHTML = `
+        function updateAccentColorCSS(hex) {
+            const styleEl = document.getElementById('dynamic-accent-style');
+            styleEl.innerHTML = `
                 .accent-text { color: ${hex} !important; }
                 .accent-bg { background-color: ${hex} !important; }
                 .accent-border { border-color: ${hex} !important; }
             `;
         }
-    }
 
-    function selectAccentColor(hex) {
-        document.getElementById('set-accent-hex').value = hex;
-        applyAccentColor(hex);
-    }
-
-    function handleLogoUpload(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const maxWidth = 450;
-                const scale = Math.min(1, maxWidth / img.width);
-                canvas.width = img.width * scale;
-                canvas.height = img.height * scale;
-
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                const compressedLogo = canvas.toDataURL('image/png');
-                document.getElementById('set-logo-url').value = compressedLogo;
-                document.getElementById('admin-logo-preview').src = compressedLogo;
-                showToast('Logo caricato!', 'success');
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function handleHeroBgUpload(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const maxWidth = 1400;
-                const scale = Math.min(1, maxWidth / img.width);
-                canvas.width = img.width * scale;
-                canvas.height = img.height * scale;
-
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                const compressed = canvas.toDataURL('image/jpeg', 0.8);
-                document.getElementById('set-hero-bg').value = compressed;
-                showToast('Sfondo caricato!', 'success');
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function handleSaveHomeSettings(event) {
-        event.preventDefault();
-        if (!isAdminLoggedIn) return;
-
-        settings.serverName = document.getElementById('set-server-name').value.trim() || defaultSettings.serverName;
-        settings.heroTitle = document.getElementById('set-hero-title').value.trim() || defaultSettings.heroTitle;
-        settings.heroSubtitle = document.getElementById('set-hero-subtitle').value.trim() || defaultSettings.heroSubtitle;
-        settings.logoUrl = document.getElementById('set-logo-url').value.trim() || defaultSettings.logoUrl;
-        settings.heroBg = document.getElementById('set-hero-bg').value.trim() || defaultSettings.heroBg;
-        settings.discordUrl = document.getElementById('set-discord-url').value.trim() || defaultSettings.discordUrl;
-        settings.accentHex = document.getElementById('set-accent-hex').value || defaultSettings.accentHex;
-        settings.adminUser = document.getElementById('set-admin-user').value.trim() || defaultSettings.adminUser;
-        settings.adminPass = document.getElementById('set-admin-pass').value || defaultSettings.adminPass;
-
-        saveSettingsToFirebase();
-        applySettingsToUI();
-        showToast('Impostazioni salvate su Firebase!', 'success');
-    }
-
-    function updatePreviewImageSize() {
-        const height = document.getElementById('v-img-height').value;
-        const fit = document.querySelector('input[name="v-img-fit"]:checked').value;
-        
-        document.getElementById('v-height-label').textContent = `${height} px`;
-        const previewBox = document.getElementById('v-preview-box');
-        const previewImg = document.getElementById('v-image-preview');
-        
-        previewBox.style.height = `${height}px`;
-        previewImg.style.objectFit = fit;
-    }
-
-    function renderVehicles() {
-        const grid = document.getElementById('vehicles-grid');
-        const emptyState = document.getElementById('empty-state');
-        const searchInput = document.getElementById('search-input');
-        if (!grid || !searchInput) return;
-
-        const searchTerm = searchInput.value.toLowerCase().trim();
-
-        const filtered = vehicles.filter(v => {
-            return v.name.toLowerCase().includes(searchTerm) || 
-                   v.description.toLowerCase().includes(searchTerm);
-        });
-
-        if (filtered.length === 0) {
+        function renderVehicles() {
+            const grid = document.getElementById('vehicles-grid');
+            const emptyState = document.getElementById('empty-state');
+            const searchVal = document.getElementById('search-input').value.toLowerCase();
+            
             grid.innerHTML = '';
-            emptyState.classList.remove('hidden');
-            return;
-        }
+            const vehiclesArray = Object.values(appData.vehicles);
+            
+            const filtered = vehiclesArray.filter(v => 
+                v.name.toLowerCase().includes(searchVal) || 
+                v.description.toLowerCase().includes(searchVal) ||
+                v.price.toLowerCase().includes(searchVal)
+            );
 
-        emptyState.classList.add('hidden');
-        grid.innerHTML = filtered.map(v => {
-            const h = v.imgHeight || 240;
-            const fit = v.imgFit || 'cover';
-            return `
-            <article class="group bg-cardBg hover:bg-cardHover border border-white/10 hover:border-amber-500/40 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col justify-between shadow-xl hover:-translate-y-1.5">
-                <div>
-                    <div style="height: ${h}px;" class="relative overflow-hidden bg-black cursor-pointer" onclick="openVehicleModal('${v.id}')">
-                        <img src="${v.image}" alt="${escapeHtml(v.name)}" style="object-fit: ${fit};" onerror="this.src='https://placehold.co/800x500/160d0e/f59e0b?text=Veicolo+Bit'" class="w-full h-full group-hover:scale-105 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-cardBg via-transparent to-transparent opacity-70 pointer-events-none"></div>
-                        <span class="absolute bottom-3 right-3 px-4 py-1.5 rounded-xl font-display font-bold text-lg accent-bg bg-amber-500 text-black shadow-lg">
-                            ${escapeHtml(v.price)}
-                        </span>
-                    </div>
-
-                    <div class="p-6">
-                        <h3 class="font-roman font-bold text-xl text-white group-hover:accent-text transition-colors cursor-pointer" onclick="openVehicleModal('${v.id}')">
-                            ${escapeHtml(v.name)}
-                        </h3>
-                        <p class="text-xs text-gray-400 line-clamp-3 mt-2.5 leading-relaxed">
-                            ${escapeHtml(v.description)}
-                        </p>
-                    </div>
-                </div>
-
-                <div class="px-6 pb-6 pt-2">
-                    <button onclick="openVehicleModal('${v.id}')" class="w-full py-3 px-4 rounded-xl bg-white/10 hover:bg-amber-500 hover:text-black text-white font-bold text-xs uppercase tracking-wider transition flex items-center justify-center gap-2 cursor-pointer">
-                        <i class="fa-solid fa-bolt"></i> Dettagli & Acquista
-                    </button>
-                </div>
-            </article>
-            `;
-        }).join('');
-    }
-
-    function renderAdminVehiclesList() {
-        const list = document.getElementById('admin-vehicles-list');
-        const counter = document.getElementById('admin-vehicle-count');
-        if (!list) return;
-
-        counter.textContent = `${vehicles.length} Mezz${vehicles.length === 1 ? 'o' : 'i'}`;
-
-        if (vehicles.length === 0) {
-            list.innerHTML = `<p class="text-sm text-gray-500 col-span-full text-center py-8">Nessun mezzo presente.</p>`;
-            return;
-        }
-
-        list.innerHTML = vehicles.map(v => `
-            <div class="bg-darkBg border border-white/10 rounded-2xl overflow-hidden flex flex-col justify-between">
-                <div>
-                    <div class="relative h-40 bg-black">
-                        <img src="${v.image}" alt="${escapeHtml(v.name)}" style="object-fit: ${v.imgFit || 'cover'};" class="w-full h-full">
-                        <span class="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-black/80 text-amber-400 font-display font-bold text-sm border border-amber-500/30">
-                            ${escapeHtml(v.price)}
-                        </span>
-                    </div>
-                    <div class="p-4">
-                        <h4 class="font-roman font-bold text-base text-white">${escapeHtml(v.name)}</h4>
-                        <p class="text-xs text-gray-400 line-clamp-2 mt-1">${escapeHtml(v.description)}</p>
-                    </div>
-                </div>
-                <div class="p-4 pt-0 flex items-center gap-2">
-                    <button onclick="editVehicle('${v.id}')" class="flex-1 py-2 px-3 rounded-xl bg-amber-500/15 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
-                        <i class="fa-solid fa-pen"></i> Modifica
-                    </button>
-                    <button onclick="deleteVehicle('${v.id}')" class="py-2 px-3.5 rounded-xl bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/30 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
-                        <i class="fa-solid fa-trash"></i> Elimina
-                    </button>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    function handleImageUpload(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const maxWidth = 1000;
-                const scale = Math.min(1, maxWidth / img.width);
-                canvas.width = img.width * scale;
-                canvas.height = img.height * scale;
-
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
-                document.getElementById('v-image-preview').src = compressedDataUrl;
-                document.getElementById('v-image-url').value = compressedDataUrl;
-                showToast('Foto caricata!', 'success');
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function handleImageUrlInput(url) {
-        if (url.trim()) {
-            document.getElementById('v-image-preview').src = url.trim();
-        }
-    }
-
-    function handleSaveVehicle(event) {
-        event.preventDefault();
-        if (!isAdminLoggedIn) return;
-
-        const editId = document.getElementById('edit-vehicle-id').value;
-        const name = document.getElementById('v-name').value.trim();
-        const price = document.getElementById('v-price').value.trim();
-        const description = document.getElementById('v-desc').value.trim();
-        const image = document.getElementById('v-image-url').value.trim() || document.getElementById('v-image-preview').src;
-        const imgHeight = parseInt(document.getElementById('v-img-height').value) || 240;
-        const imgFit = document.querySelector('input[name="v-img-fit"]:checked').value || 'cover';
-
-        if (editId) {
-            const index = vehicles.findIndex(v => v.id === editId);
-            if (index !== -1) {
-                vehicles[index] = { id: editId, name, price, description, image, imgHeight, imgFit };
-                showToast('Mezzo aggiornato su Firebase!', 'success');
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
             }
-        } else {
-            const newVehicle = {
-                id: 'v_' + Date.now(),
+
+            filtered.forEach(v => {
+                const imgHeight = v.imageHeight || '240';
+                const imgFit = v.imageFit || 'cover';
+
+                const card = document.createElement('div');
+                card.className = 'bg-cardBg hover:bg-cardHover border border-white/10 hover:border-amber-500/40 rounded-3xl overflow-hidden transition-all duration-300 flex flex-col shadow-xl group';
+                card.innerHTML = `
+                    <div style="height: ${imgHeight}px;" class="w-full bg-black overflow-hidden relative transition-all">
+                        <img src="${v.imageUrl}" onerror="this.src='https://placehold.co/800x600/140c0d/f59e0b?text=SPQR+VEHICLE'" alt="${v.name}" class="w-full h-full object-${imgFit} group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute top-3 right-3 bg-darkBg/80 backdrop-blur-md border border-amber-500/30 text-amber-400 font-display font-bold text-sm px-3.5 py-1.5 rounded-xl shadow-lg">
+                            ${v.price}
+                        </div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                        <div>
+                            <h3 class="font-roman font-bold text-xl text-white group-hover:text-amber-400 transition-colors">${v.name}</h3>
+                            <p class="text-sm text-gray-300 mt-2 font-light leading-relaxed">${v.description}</p>
+                        </div>
+                        <div class="pt-4 border-t border-white/10 flex items-center justify-between">
+                            <span class="text-xs uppercase tracking-wider text-gray-400">Disponibile in Concessionaria</span>
+                            <a href="${appData.settings.discordUrl}" target="_blank" rel="noopener noreferrer" class="accent-bg bg-amber-500 hover:opacity-90 text-black font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-md">
+                                <i class="fa-solid fa-key"></i> Richiedi Bit
+                            </a>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // GESTIONE ADMIN & INTERFACCIA
+        function handleSecretGearClick() {
+            if (isAdminLoggedIn) {
+                openAdminWorkspace();
+            } else {
+                document.getElementById('admin-login-modal').classList.remove('hidden');
+                document.getElementById('admin-login-modal').classList.add('flex');
+            }
+        }
+
+        function closeAdminLoginModal() {
+            document.getElementById('admin-login-modal').classList.add('hidden');
+            document.getElementById('admin-login-modal').classList.remove('flex');
+        }
+
+        function submitAdminLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('login-user').value.trim();
+            const p = document.getElementById('login-pass').value.trim();
+
+            const sUser = appData.settings.adminUser || 'admin';
+            const sPass = appData.settings.adminPass || 'roma2026';
+
+            if (u === sUser && p === sPass) {
+                isAdminLoggedIn = true;
+                closeAdminLoginModal();
+                openAdminWorkspace();
+                showToast("Accesso Admin Effettuato con Successo!");
+            } else {
+                showToast("Username o Password errati!", "error");
+            }
+        }
+
+        function openAdminWorkspace() {
+            document.getElementById('public-site-view').classList.add('hidden');
+            document.getElementById('admin-workspace-view').classList.remove('hidden');
+            document.getElementById('return-admin-btn').classList.remove('hidden');
+            document.getElementById('return-admin-btn').classList.add('flex');
+            window.scrollTo({top: 0, behavior: 'smooth'});
+            populateAdminFormSettings();
+            renderAdminVehicles();
+        }
+
+        function switchToPublicPreview() {
+            document.getElementById('admin-workspace-view').classList.add('hidden');
+            document.getElementById('public-site-view').classList.remove('hidden');
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function logoutAdmin() {
+            isAdminLoggedIn = false;
+            document.getElementById('return-admin-btn').classList.add('hidden');
+            document.getElementById('return-admin-btn').classList.remove('flex');
+            switchToPublicPreview();
+            showToast("Disconnesso dall'area Admin.");
+        }
+
+        function switchAdminTab(tabId) {
+            document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+                btn.classList.remove('accent-bg', 'bg-amber-500', 'text-black');
+                btn.classList.add('bg-cardBg', 'border', 'border-white/10', 'text-gray-300');
+            });
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.add('accent-bg', 'bg-amber-500', 'text-black');
+            activeBtn.classList.remove('bg-cardBg', 'border', 'border-white/10', 'text-gray-300');
+
+            if (tabId === 'tab-vehicles') {
+                document.getElementById('tab-vehicles').classList.remove('hidden');
+                document.getElementById('tab-home').classList.add('hidden');
+            } else {
+                document.getElementById('tab-vehicles').classList.add('hidden');
+                document.getElementById('tab-home').classList.remove('hidden');
+            }
+        }
+
+        // GESTIONE MEZZI IN ADMIN
+        function renderAdminVehicles() {
+            const list = document.getElementById('admin-vehicles-list');
+            const countEl = document.getElementById('admin-vehicle-count');
+            list.innerHTML = '';
+            
+            const vehicles = Object.entries(appData.vehicles);
+            countEl.textContent = `${vehicles.length} Mezzi`;
+
+            if (vehicles.length === 0) {
+                list.innerHTML = `<p class="col-span-full text-center py-10 text-gray-500 text-sm">Nessun veicolo nel database.</p>`;
+                return;
+            }
+
+            vehicles.forEach(([id, v]) => {
+                const item = document.createElement('div');
+                item.className = 'bg-darkBg border border-white/10 rounded-2xl p-4 flex flex-col justify-between gap-4';
+                item.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <img src="${v.imageUrl}" onerror="this.src='https://placehold.co/200x200/140c0d/f59e0b?text=SPQR'" alt="${v.name}" class="w-16 h-16 rounded-xl object-cover border border-white/10 shrink-0">
+                        <div class="overflow-hidden">
+                            <h4 class="font-roman font-bold text-white text-base truncate">${v.name}</h4>
+                            <span class="text-xs accent-text text-amber-400 font-bold">${v.price}</span>
+                            <p class="text-xs text-gray-400 line-clamp-1 mt-0.5">${v.description}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
+                        <button onclick="editVehicle('${id}')" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition cursor-pointer">
+                            <i class="fa-solid fa-pen mr-1"></i> Modifica
+                        </button>
+                        <button onclick="deleteVehicle('${id}')" class="px-3 py-1.5 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-xs font-semibold text-red-300 transition cursor-pointer">
+                            <i class="fa-solid fa-trash mr-1"></i> Elimina
+                        </button>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function handleSaveVehicle(e) {
+            e.preventDefault();
+            const editId = document.getElementById('edit-vehicle-id').value;
+            const name = document.getElementById('v-name').value.trim();
+            const price = document.getElementById('v-price').value.trim();
+            const desc = document.getElementById('v-desc').value.trim();
+            const imageUrl = document.getElementById('v-image-url').value.trim() || document.getElementById('v-image-preview').src;
+            const imageHeight = document.getElementById('v-img-height').value;
+            const imageFit = document.querySelector('input[name="v-img-fit"]:checked').value;
+
+            const vehicleId = editId ? editId : 'v_' + Date.now();
+
+            appData.vehicles[vehicleId] = {
+                id: vehicleId,
                 name,
                 price,
-                description,
-                image,
-                imgHeight,
-                imgFit
+                description: desc,
+                imageUrl,
+                imageHeight,
+                imageFit
             };
-            vehicles.unshift(newVehicle);
-            showToast('Nuovo mezzo pubblicato su Firebase!', 'success');
+
+            saveDataToCloud();
+            resetVehicleForm();
+            showToast(editId ? "Veicolo aggiornato con successo!" : "Nuovo veicolo aggiunto con successo!");
         }
 
-        saveVehiclesToFirebase();
-        resetVehicleForm();
-    }
+        function editVehicle(id) {
+            const v = appData.vehicles[id];
+            if (!v) return;
 
-    function editVehicle(id) {
-        if (!isAdminLoggedIn) return;
-        const v = vehicles.find(item => item.id === id);
-        if (!v) return;
+            document.getElementById('edit-vehicle-id').value = id;
+            document.getElementById('v-name').value = v.name;
+            document.getElementById('v-price').value = v.price;
+            document.getElementById('v-desc').value = v.description;
+            document.getElementById('v-image-url').value = v.imageUrl;
+            document.getElementById('v-image-preview').src = v.imageUrl;
+            
+            const h = v.imageHeight || '240';
+            document.getElementById('v-img-height').value = h;
+            document.getElementById('v-height-label').textContent = h + ' px';
+            document.getElementById('v-preview-box').style.height = h + ' px';
 
-        switchAdminTab('tab-vehicles');
-        document.getElementById('vehicle-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (v.imageFit) {
+                const fitRadio = document.querySelector(`input[name="v-img-fit"][value="${v.imageFit}"]`);
+                if (fitRadio) fitRadio.checked = true;
+            }
 
-        document.getElementById('edit-vehicle-id').value = v.id;
-        document.getElementById('v-name').value = v.name;
-        document.getElementById('v-price').value = v.price;
-        document.getElementById('v-desc').value = v.description;
-        document.getElementById('v-image-url').value = v.image;
-        document.getElementById('v-image-preview').src = v.image;
+            document.getElementById('form-vehicle-title').innerHTML = `<i class="fa-solid fa-pen-to-square accent-text text-amber-400"></i> Modifica Mezzo`;
+            document.getElementById('btn-save-vehicle-text').textContent = "Salva Modifiche";
+            document.getElementById('btn-cancel-edit').classList.remove('hidden');
 
-        const h = v.imgHeight || 240;
-        const fit = v.imgFit || 'cover';
-        document.getElementById('v-img-height').value = h;
-        const radio = document.querySelector(`input[name="v-img-fit"][value="${fit}"]`);
-        if (radio) radio.checked = true;
-        updatePreviewImageSize();
-
-        document.getElementById('form-vehicle-title').innerHTML = `<i class="fa-solid fa-pen accent-text"></i> Modifica: ${escapeHtml(v.name)}`;
-        document.getElementById('btn-save-vehicle-text').textContent = 'Salva Modifiche';
-        document.getElementById('btn-cancel-edit').classList.remove('hidden');
-    }
-
-    function resetVehicleForm() {
-        document.getElementById('vehicle-form').reset();
-        document.getElementById('edit-vehicle-id').value = '';
-        document.getElementById('v-image-preview').src = 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=800&q=80';
-        document.getElementById('v-img-height').value = 240;
-        document.querySelector('input[name="v-img-fit"][value="cover"]').checked = true;
-        updatePreviewImageSize();
-        document.getElementById('form-vehicle-title').innerHTML = `<i class="fa-solid fa-plus-circle accent-text"></i> Aggiungi Nuovo Mezzo`;
-        document.getElementById('btn-save-vehicle-text').textContent = 'Pubblica Mezzo';
-        document.getElementById('btn-cancel-edit').classList.add('hidden');
-    }
-
-    function deleteVehicle(id) {
-        if (!isAdminLoggedIn) return;
-        vehicles = vehicles.filter(v => v.id !== id);
-        saveVehiclesToFirebase();
-        showToast('Mezzo eliminato da Firebase.', 'info');
-    }
-
-    function openVehicleModal(id) {
-        const v = vehicles.find(item => item.id === id);
-        if (!v) return;
-        activeModalVehicle = v;
-
-        document.getElementById('modal-img').src = v.image;
-        document.getElementById('modal-title').textContent = v.name;
-        document.getElementById('modal-price').textContent = v.price;
-        document.getElementById('modal-desc').textContent = v.description;
-
-        const modal = document.getElementById('vehicle-modal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
-
-    function closeVehicleModal() {
-        const modal = document.getElementById('vehicle-modal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        activeModalVehicle = null;
-    }
-
-    function copyOrderTicket() {
-        if (!activeModalVehicle) return;
-        const textToCopy = `🏛️ ${settings.serverName.toUpperCase()} — RICHIESTA VEICOLO BIT\n• Modello: ${activeModalVehicle.name}\n• Prezzo: ${activeModalVehicle.price}`;
-        
-        const tempInput = document.createElement('textarea');
-        tempInput.value = textToCopy;
-        document.body.appendChild(tempInput);
-        tempInput.select();
-        document.execCommand('copy');
-        document.body.removeChild(tempInput);
-
-        showToast('Dati copiati per Discord!', 'success');
-    }
-
-    function exportStoreData() {
-        const backup = { settings, vehicles };
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup, null, 2));
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", "impero_romano_store_backup.json");
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        downloadAnchor.remove();
-        showToast('Backup scaricato!', 'success');
-    }
-
-    function resetDefaultData() {
-        if (!isAdminLoggedIn) return;
-        if (confirm("Vuoi davvero ripristinare i dati di default su Firebase?")) {
-            settings = { ...defaultSettings };
-            vehicles = [...defaultVehicles];
-            saveSettingsToFirebase();
-            saveVehiclesToFirebase();
-            showToast('Database ripristinato ai valori iniziali.', 'info');
+            window.scrollTo({top: 0, behavior: 'smooth'});
         }
-    }
 
-    function showToast(message, type = 'success') {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        const icon = type === 'success' ? 'fa-circle-check text-emerald-400' : (type === 'error' ? 'fa-circle-exclamation text-red-400' : 'fa-circle-info text-amber-400');
+        function deleteVehicle(id) {
+            if (confirm("Sei sicuro di voler eliminare questo veicolo dal catalogo?")) {
+                delete appData.vehicles[id];
+                saveDataToCloud();
+                showToast("Veicolo eliminato.");
+            }
+        }
 
-        toast.className = 'bg-cardBg border border-white/15 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-sm font-medium pointer-events-auto transition-all duration-300';
-        toast.innerHTML = `<i class="fa-solid ${icon} text-base"></i> <span>${message}</span>`;
+        function resetVehicleForm() {
+            document.getElementById('vehicle-form').reset();
+            document.getElementById('edit-vehicle-id').value = '';
+            document.getElementById('v-image-preview').src = "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=800&q=80";
+            document.getElementById('v-preview-box').style.height = '240px';
+            document.getElementById('v-height-label').textContent = '240 px';
+            document.getElementById('form-vehicle-title').innerHTML = `<i class="fa-solid fa-plus-circle accent-text text-amber-400"></i> Aggiungi Nuovo Mezzo`;
+            document.getElementById('btn-save-vehicle-text').textContent = "Pubblica Mezzo";
+            document.getElementById('btn-cancel-edit').classList.add('hidden');
+        }
 
-        container.appendChild(toast);
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateY(10px)';
-            setTimeout(() => toast.remove(), 300);
-        }, 3200);
-    }
+        function updatePreviewImageSize() {
+            const val = document.getElementById('v-img-height').value;
+            document.getElementById('v-height-label').textContent = val + ' px';
+            document.getElementById('v-preview-box').style.height = val + 'px';
+            const fit = document.querySelector('input[name="v-img-fit"]:checked').value;
+            const img = document.getElementById('v-image-preview');
+            img.className = `w-full h-full object-${fit}`;
+        }
 
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-</script>
+        function handleImageUrlInput(url) {
+            if (url.trim()) {
+                document.getElementById('v-image-preview').src = url.trim();
+            }
+        }
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const base64 = event.target.result;
+                    document.getElementById('v-image-preview').src = base64;
+                    document.getElementById('v-image-url').value = base64;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // IMPOSTAZIONI SITO
+        function populateAdminFormSettings() {
+            const s = appData.settings;
+            document.getElementById('set-server-name').
