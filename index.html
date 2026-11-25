@@ -1,0 +1,667 @@
+<!-- FIREBASE SDKs (Versione Compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+<!-- JAVASCRIPT & FIREBASE SYNC -->
+<script>
+    // Configurazione Firebase ufficiale del tuo progetto
+    const firebaseConfig = {
+        apiKey: "AIzaSyC6NE1BJULbSMUNAzhpKyvqtekwbwoAV4c",
+        authDomain: "impero-romano-rp.firebaseapp.com",
+        databaseURL: "https://impero-romano-rp-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "impero-romano-rp",
+        storageBucket: "impero-romano-rp.firebasestorage.app",
+        messagingSenderId: "665352248621",
+        appId: "1:665352248621:web:bb61b4b3625e38299f47a4",
+        measurementId: "G-2ZJW8CD3W0"
+    };
+
+    // Inizializzazione Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const SESSION_AUTH_KEY = 'impero_romano_admin_logged_in';
+
+    const defaultSettings = {
+        serverName: 'IMPERO ROMANO FULL RP',
+        heroTitle: "DOMINA L'ASFALTO DI ROMA",
+        heroSubtitle: "Oltre 300 km/h tra il Colosseo e il Grande Raccordo Anulare. Scegli la tua fuoriserie esclusiva Bit, lascia il segno sull'asfalto della Capitale e imponi la tua legge.",
+        heroBg: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=1920&q=85',
+        logoUrl: './0EB05BAC-3C6B-4503-BA2E-C8E0FF6D9350.png',
+        discordUrl: 'https://discord.com',
+        accentHex: '#f59e0b',
+        adminUser: 'admin',
+        adminPass: 'roma2026'
+    };
+
+    const defaultVehicles = [
+        {
+            id: 'v1',
+            name: 'Grotti Centurione V12 SPQR',
+            price: '3.500 Bit',
+            description: 'Hypercar italiana V12 aspirata in edizione limitata Impero Romano. Aerodinamica attiva in carbonio forgiato, sound scarico da pista e livrea oro/porpora dedicata.',
+            image: 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=900&q=80',
+            imgHeight: 240,
+            imgFit: 'cover'
+        },
+        {
+            id: 'v2',
+            name: 'Lampadati Tiberina GT Widebody',
+            price: '2.400 Bit',
+            description: 'Coupé sportiva preparata nei migliori garage della Capitale. Assetto ribassato, scarico in titanio con fiammate custom e oltre 40 modifiche estetiche.',
+            image: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=900&q=80',
+            imgHeight: 240,
+            imgFit: 'cover'
+        },
+        {
+            id: 'v3',
+            name: 'Principe Gladiatore 1000 RR',
+            price: '1.800 Bit',
+            description: 'Superbike da competizione ultra-leggera, ideale per tagliare il traffico del centro storico di Roma con accelerazione bruciante.',
+            image: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=900&q=80',
+            imgHeight: 240,
+            imgFit: 'cover'
+        }
+    ];
+
+    let vehicles = [];
+    let settings = {};
+    let activeModalVehicle = null;
+    let isAdminLoggedIn = false;
+    let isViewingAdminWorkspace = false;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadDataFromFirebase();
+        checkAuthSession();
+    });
+
+    // Ascolta in tempo reale i dati da Firebase Realtime Database
+    function loadDataFromFirebase() {
+        db.ref('store/settings').on('value', (snapshot) => {
+            const val = snapshot.val();
+            settings = val ? { ...defaultSettings, ...val } : { ...defaultSettings };
+            applySettingsToUI();
+        });
+
+        db.ref('store/vehicles').on('value', (snapshot) => {
+            const val = snapshot.val();
+            if (val) {
+                vehicles = Object.keys(val).map(key => ({ id: key, ...val[key] }));
+            } else {
+                vehicles = [...defaultVehicles];
+            }
+            renderVehicles();
+            renderAdminVehiclesList();
+        });
+    }
+
+    function saveVehiclesToFirebase() {
+        const vehiclesObj = {};
+        vehicles.forEach(v => {
+            const id = v.id;
+            const copy = { ...v };
+            delete copy.id;
+            vehiclesObj[id] = copy;
+        });
+        db.ref('store/vehicles').set(vehiclesObj).catch(err => {
+            showToast('Errore di salvataggio su Firebase.', 'error');
+        });
+    }
+
+    function saveSettingsToFirebase() {
+        db.ref('store/settings').set(settings).catch(err => {
+            showToast('Errore salvataggio impostazioni su Firebase.', 'error');
+        });
+    }
+
+    function checkAuthSession() {
+        isAdminLoggedIn = sessionStorage.getItem(SESSION_AUTH_KEY) === 'true';
+        updateViewMode();
+    }
+
+    function updateViewMode() {
+        const publicView = document.getElementById('public-site-view');
+        const adminView = document.getElementById('admin-workspace-view');
+        const returnBtn = document.getElementById('return-admin-btn');
+        const gear = document.getElementById('secret-admin-trigger');
+
+        if (isAdminLoggedIn && isViewingAdminWorkspace) {
+            publicView.classList.add('hidden');
+            adminView.classList.remove('hidden');
+            gear.classList.add('hidden');
+            window.scrollTo({ top: 0 });
+        } else {
+            adminView.classList.add('hidden');
+            publicView.classList.remove('hidden');
+            gear.classList.remove('hidden');
+
+            if (isAdminLoggedIn) {
+                returnBtn.classList.remove('hidden');
+                returnBtn.classList.add('flex');
+                gear.classList.remove('opacity-15');
+                gear.classList.add('opacity-90', 'text-amber-400', 'border-amber-500/40');
+            } else {
+                returnBtn.classList.add('hidden');
+                returnBtn.classList.remove('flex');
+                gear.classList.add('opacity-15');
+                gear.classList.remove('opacity-90', 'text-amber-400', 'border-amber-500/40');
+            }
+        }
+    }
+
+    function openAdminWorkspace() {
+        if (!isAdminLoggedIn) {
+            openLoginModal();
+            return;
+        }
+        isViewingAdminWorkspace = true;
+        renderAdminVehiclesList();
+        updateViewMode();
+    }
+
+    function switchToPublicPreview() {
+        isViewingAdminWorkspace = false;
+        renderVehicles();
+        updateViewMode();
+    }
+
+    function handleSecretGearClick() {
+        if (isAdminLoggedIn) {
+            openAdminWorkspace();
+        } else {
+            openLoginModal();
+        }
+    }
+
+    function openLoginModal() {
+        const modal = document.getElementById('admin-login-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.getElementById('login-username').value = '';
+        document.getElementById('login-password').value = '';
+        setTimeout(() => document.getElementById('login-username').focus(), 100);
+    }
+
+    function closeLoginModal() {
+        const modal = document.getElementById('admin-login-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    function handleAdminLogin(event) {
+        event.preventDefault();
+        const user = document.getElementById('login-username').value.trim();
+        const pass = document.getElementById('login-password').value;
+
+        const validUser = settings.adminUser || defaultSettings.adminUser;
+        const validPass = settings.adminPass || defaultSettings.adminPass;
+
+        if (user === validUser && pass === validPass) {
+            isAdminLoggedIn = true;
+            isViewingAdminWorkspace = true;
+            sessionStorage.setItem(SESSION_AUTH_KEY, 'true');
+            closeLoginModal();
+            renderAdminVehiclesList();
+            updateViewMode();
+            showToast('Accesso effettuato con successo!', 'success');
+        } else {
+            showToast('Credenziali errate!', 'error');
+        }
+    }
+
+    function logoutAdmin() {
+        isAdminLoggedIn = false;
+        isViewingAdminWorkspace = false;
+        sessionStorage.removeItem(SESSION_AUTH_KEY);
+        resetVehicleForm();
+        renderVehicles();
+        updateViewMode();
+        showToast('Disconnesso dall\'area Admin.', 'info');
+    }
+
+    function switchAdminTab(tabId) {
+        document.getElementById('tab-vehicles').classList.add('hidden');
+        document.getElementById('tab-home').classList.add('hidden');
+        document.getElementById(tabId).classList.remove('hidden');
+
+        document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+            btn.className = 'admin-tab-btn px-5 py-2.5 rounded-xl text-sm font-semibold bg-cardBg border border-white/10 text-gray-300 hover:bg-white/10 transition cursor-pointer';
+        });
+
+        const activeBtn = tabId === 'tab-vehicles' ? document.getElementById('btn-tab-vehicles') : document.getElementById('btn-tab-home');
+        activeBtn.className = 'admin-tab-btn px-5 py-2.5 rounded-xl text-sm font-bold accent-bg bg-amber-500 text-black transition cursor-pointer';
+    }
+
+    function applySettingsToUI() {
+        if (!settings.serverName) return;
+        const nameUpper = settings.serverName.trim();
+        if (nameUpper.toUpperCase().endsWith('FULL RP')) {
+            const baseName = nameUpper.slice(0, -7).trim();
+            document.getElementById('nav-server-name').innerHTML = `${escapeHtml(baseName)} <span class="accent-text">FULL RP</span>`;
+        } else {
+            const parts = nameUpper.split(' ');
+            if (parts.length > 1) {
+                const lastWord = parts.pop();
+                document.getElementById('nav-server-name').innerHTML = `${escapeHtml(parts.join(' '))} <span class="accent-text">${escapeHtml(lastWord)}</span>`;
+            } else {
+                document.getElementById('nav-server-name').innerHTML = `<span class="accent-text">${escapeHtml(nameUpper)}</span>`;
+            }
+        }
+
+        const logoSrc = settings.logoUrl || defaultSettings.logoUrl;
+        document.getElementById('nav-logo-img').src = logoSrc;
+        document.getElementById('hero-logo-img').src = logoSrc;
+        document.getElementById('admin-logo-preview').src = logoSrc;
+
+        document.getElementById('hero-title-display').textContent = settings.heroTitle;
+        document.getElementById('hero-subtitle-display').textContent = settings.heroSubtitle;
+        document.getElementById('hero-bg-image').style.backgroundImage = `url('${settings.heroBg}')`;
+        
+        const discordUrl = settings.discordUrl || 'https://discord.com';
+        document.getElementById('header-discord-link').href = discordUrl;
+        document.getElementById('hero-discord-btn').href = discordUrl;
+        document.getElementById('modal-discord-btn').href = discordUrl;
+        document.getElementById('footer-text').textContent = `© 2026 ${settings.serverName} - Concessionario Ufficiale Bit Roma.`;
+
+        document.getElementById('set-server-name').value = settings.serverName;
+        document.getElementById('set-hero-title').value = settings.heroTitle;
+        document.getElementById('set-hero-subtitle').value = settings.heroSubtitle;
+        document.getElementById('set-logo-url').value = settings.logoUrl || '';
+        document.getElementById('set-hero-bg').value = settings.heroBg;
+        document.getElementById('set-discord-url').value = settings.discordUrl;
+        document.getElementById('set-accent-hex').value = settings.accentHex;
+        document.getElementById('set-admin-user').value = settings.adminUser || defaultSettings.adminUser;
+        document.getElementById('set-admin-pass').value = settings.adminPass || defaultSettings.adminPass;
+
+        applyAccentColor(settings.accentHex);
+    }
+
+    function applyAccentColor(hex) {
+        const styleTag = document.getElementById('dynamic-accent-style');
+        if (styleTag) {
+            styleTag.innerHTML = `
+                .accent-text { color: ${hex} !important; }
+                .accent-bg { background-color: ${hex} !important; }
+                .accent-border { border-color: ${hex} !important; }
+            `;
+        }
+    }
+
+    function selectAccentColor(hex) {
+        document.getElementById('set-accent-hex').value = hex;
+        applyAccentColor(hex);
+    }
+
+    function handleLogoUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const maxWidth = 450;
+                const scale = Math.min(1, maxWidth / img.width);
+                canvas.width = img.width * scale;
+                canvas.height = img.height * scale;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                const compressedLogo = canvas.toDataURL('image/png');
+                document.getElementById('set-logo-url').value = compressedLogo;
+                document.getElementById('admin-logo-preview').src = compressedLogo;
+                showToast('Logo caricato!', 'success');
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function handleHeroBgUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const maxWidth = 1400;
+                const scale = Math.min(1, maxWidth / img.width);
+                canvas.width = img.width * scale;
+                canvas.height = img.height * scale;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                const compressed = canvas.toDataURL('image/jpeg', 0.8);
+                document.getElementById('set-hero-bg').value = compressed;
+                showToast('Sfondo caricato!', 'success');
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function handleSaveHomeSettings(event) {
+        event.preventDefault();
+        if (!isAdminLoggedIn) return;
+
+        settings.serverName = document.getElementById('set-server-name').value.trim() || defaultSettings.serverName;
+        settings.heroTitle = document.getElementById('set-hero-title').value.trim() || defaultSettings.heroTitle;
+        settings.heroSubtitle = document.getElementById('set-hero-subtitle').value.trim() || defaultSettings.heroSubtitle;
+        settings.logoUrl = document.getElementById('set-logo-url').value.trim() || defaultSettings.logoUrl;
+        settings.heroBg = document.getElementById('set-hero-bg').value.trim() || defaultSettings.heroBg;
+        settings.discordUrl = document.getElementById('set-discord-url').value.trim() || defaultSettings.discordUrl;
+        settings.accentHex = document.getElementById('set-accent-hex').value || defaultSettings.accentHex;
+        settings.adminUser = document.getElementById('set-admin-user').value.trim() || defaultSettings.adminUser;
+        settings.adminPass = document.getElementById('set-admin-pass').value || defaultSettings.adminPass;
+
+        saveSettingsToFirebase();
+        applySettingsToUI();
+        showToast('Impostazioni salvate su Firebase!', 'success');
+    }
+
+    function updatePreviewImageSize() {
+        const height = document.getElementById('v-img-height').value;
+        const fit = document.querySelector('input[name="v-img-fit"]:checked').value;
+        
+        document.getElementById('v-height-label').textContent = `${height} px`;
+        const previewBox = document.getElementById('v-preview-box');
+        const previewImg = document.getElementById('v-image-preview');
+        
+        previewBox.style.height = `${height}px`;
+        previewImg.style.objectFit = fit;
+    }
+
+    function renderVehicles() {
+        const grid = document.getElementById('vehicles-grid');
+        const emptyState = document.getElementById('empty-state');
+        const searchInput = document.getElementById('search-input');
+        if (!grid || !searchInput) return;
+
+        const searchTerm = searchInput.value.toLowerCase().trim();
+
+        const filtered = vehicles.filter(v => {
+            return v.name.toLowerCase().includes(searchTerm) || 
+                   v.description.toLowerCase().includes(searchTerm);
+        });
+
+        if (filtered.length === 0) {
+            grid.innerHTML = '';
+            emptyState.classList.remove('hidden');
+            return;
+        }
+
+        emptyState.classList.add('hidden');
+        grid.innerHTML = filtered.map(v => {
+            const h = v.imgHeight || 240;
+            const fit = v.imgFit || 'cover';
+            return `
+            <article class="group bg-cardBg hover:bg-cardHover border border-white/10 hover:border-amber-500/40 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col justify-between shadow-xl hover:-translate-y-1.5">
+                <div>
+                    <div style="height: ${h}px;" class="relative overflow-hidden bg-black cursor-pointer" onclick="openVehicleModal('${v.id}')">
+                        <img src="${v.image}" alt="${escapeHtml(v.name)}" style="object-fit: ${fit};" onerror="this.src='https://placehold.co/800x500/160d0e/f59e0b?text=Veicolo+Bit'" class="w-full h-full group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-cardBg via-transparent to-transparent opacity-70 pointer-events-none"></div>
+                        <span class="absolute bottom-3 right-3 px-4 py-1.5 rounded-xl font-display font-bold text-lg accent-bg bg-amber-500 text-black shadow-lg">
+                            ${escapeHtml(v.price)}
+                        </span>
+                    </div>
+
+                    <div class="p-6">
+                        <h3 class="font-roman font-bold text-xl text-white group-hover:accent-text transition-colors cursor-pointer" onclick="openVehicleModal('${v.id}')">
+                            ${escapeHtml(v.name)}
+                        </h3>
+                        <p class="text-xs text-gray-400 line-clamp-3 mt-2.5 leading-relaxed">
+                            ${escapeHtml(v.description)}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="px-6 pb-6 pt-2">
+                    <button onclick="openVehicleModal('${v.id}')" class="w-full py-3 px-4 rounded-xl bg-white/10 hover:bg-amber-500 hover:text-black text-white font-bold text-xs uppercase tracking-wider transition flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-bolt"></i> Dettagli & Acquista
+                    </button>
+                </div>
+            </article>
+            `;
+        }).join('');
+    }
+
+    function renderAdminVehiclesList() {
+        const list = document.getElementById('admin-vehicles-list');
+        const counter = document.getElementById('admin-vehicle-count');
+        if (!list) return;
+
+        counter.textContent = `${vehicles.length} Mezz${vehicles.length === 1 ? 'o' : 'i'}`;
+
+        if (vehicles.length === 0) {
+            list.innerHTML = `<p class="text-sm text-gray-500 col-span-full text-center py-8">Nessun mezzo presente.</p>`;
+            return;
+        }
+
+        list.innerHTML = vehicles.map(v => `
+            <div class="bg-darkBg border border-white/10 rounded-2xl overflow-hidden flex flex-col justify-between">
+                <div>
+                    <div class="relative h-40 bg-black">
+                        <img src="${v.image}" alt="${escapeHtml(v.name)}" style="object-fit: ${v.imgFit || 'cover'};" class="w-full h-full">
+                        <span class="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-black/80 text-amber-400 font-display font-bold text-sm border border-amber-500/30">
+                            ${escapeHtml(v.price)}
+                        </span>
+                    </div>
+                    <div class="p-4">
+                        <h4 class="font-roman font-bold text-base text-white">${escapeHtml(v.name)}</h4>
+                        <p class="text-xs text-gray-400 line-clamp-2 mt-1">${escapeHtml(v.description)}</p>
+                    </div>
+                </div>
+                <div class="p-4 pt-0 flex items-center gap-2">
+                    <button onclick="editVehicle('${v.id}')" class="flex-1 py-2 px-3 rounded-xl bg-amber-500/15 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-pen"></i> Modifica
+                    </button>
+                    <button onclick="deleteVehicle('${v.id}')" class="py-2 px-3.5 rounded-xl bg-red-500/15 hover:bg-red-500/30 text-red-400 border border-red-500/30 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-trash"></i> Elimina
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const maxWidth = 1000;
+                const scale = Math.min(1, maxWidth / img.width);
+                canvas.width = img.width * scale;
+                canvas.height = img.height * scale;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                document.getElementById('v-image-preview').src = compressedDataUrl;
+                document.getElementById('v-image-url').value = compressedDataUrl;
+                showToast('Foto caricata!', 'success');
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function handleImageUrlInput(url) {
+        if (url.trim()) {
+            document.getElementById('v-image-preview').src = url.trim();
+        }
+    }
+
+    function handleSaveVehicle(event) {
+        event.preventDefault();
+        if (!isAdminLoggedIn) return;
+
+        const editId = document.getElementById('edit-vehicle-id').value;
+        const name = document.getElementById('v-name').value.trim();
+        const price = document.getElementById('v-price').value.trim();
+        const description = document.getElementById('v-desc').value.trim();
+        const image = document.getElementById('v-image-url').value.trim() || document.getElementById('v-image-preview').src;
+        const imgHeight = parseInt(document.getElementById('v-img-height').value) || 240;
+        const imgFit = document.querySelector('input[name="v-img-fit"]:checked').value || 'cover';
+
+        if (editId) {
+            const index = vehicles.findIndex(v => v.id === editId);
+            if (index !== -1) {
+                vehicles[index] = { id: editId, name, price, description, image, imgHeight, imgFit };
+                showToast('Mezzo aggiornato su Firebase!', 'success');
+            }
+        } else {
+            const newVehicle = {
+                id: 'v_' + Date.now(),
+                name,
+                price,
+                description,
+                image,
+                imgHeight,
+                imgFit
+            };
+            vehicles.unshift(newVehicle);
+            showToast('Nuovo mezzo pubblicato su Firebase!', 'success');
+        }
+
+        saveVehiclesToFirebase();
+        resetVehicleForm();
+    }
+
+    function editVehicle(id) {
+        if (!isAdminLoggedIn) return;
+        const v = vehicles.find(item => item.id === id);
+        if (!v) return;
+
+        switchAdminTab('tab-vehicles');
+        document.getElementById('vehicle-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        document.getElementById('edit-vehicle-id').value = v.id;
+        document.getElementById('v-name').value = v.name;
+        document.getElementById('v-price').value = v.price;
+        document.getElementById('v-desc').value = v.description;
+        document.getElementById('v-image-url').value = v.image;
+        document.getElementById('v-image-preview').src = v.image;
+
+        const h = v.imgHeight || 240;
+        const fit = v.imgFit || 'cover';
+        document.getElementById('v-img-height').value = h;
+        const radio = document.querySelector(`input[name="v-img-fit"][value="${fit}"]`);
+        if (radio) radio.checked = true;
+        updatePreviewImageSize();
+
+        document.getElementById('form-vehicle-title').innerHTML = `<i class="fa-solid fa-pen accent-text"></i> Modifica: ${escapeHtml(v.name)}`;
+        document.getElementById('btn-save-vehicle-text').textContent = 'Salva Modifiche';
+        document.getElementById('btn-cancel-edit').classList.remove('hidden');
+    }
+
+    function resetVehicleForm() {
+        document.getElementById('vehicle-form').reset();
+        document.getElementById('edit-vehicle-id').value = '';
+        document.getElementById('v-image-preview').src = 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=800&q=80';
+        document.getElementById('v-img-height').value = 240;
+        document.querySelector('input[name="v-img-fit"][value="cover"]').checked = true;
+        updatePreviewImageSize();
+        document.getElementById('form-vehicle-title').innerHTML = `<i class="fa-solid fa-plus-circle accent-text"></i> Aggiungi Nuovo Mezzo`;
+        document.getElementById('btn-save-vehicle-text').textContent = 'Pubblica Mezzo';
+        document.getElementById('btn-cancel-edit').classList.add('hidden');
+    }
+
+    function deleteVehicle(id) {
+        if (!isAdminLoggedIn) return;
+        vehicles = vehicles.filter(v => v.id !== id);
+        saveVehiclesToFirebase();
+        showToast('Mezzo eliminato da Firebase.', 'info');
+    }
+
+    function openVehicleModal(id) {
+        const v = vehicles.find(item => item.id === id);
+        if (!v) return;
+        activeModalVehicle = v;
+
+        document.getElementById('modal-img').src = v.image;
+        document.getElementById('modal-title').textContent = v.name;
+        document.getElementById('modal-price').textContent = v.price;
+        document.getElementById('modal-desc').textContent = v.description;
+
+        const modal = document.getElementById('vehicle-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeVehicleModal() {
+        const modal = document.getElementById('vehicle-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        activeModalVehicle = null;
+    }
+
+    function copyOrderTicket() {
+        if (!activeModalVehicle) return;
+        const textToCopy = `🏛️ ${settings.serverName.toUpperCase()} — RICHIESTA VEICOLO BIT\n• Modello: ${activeModalVehicle.name}\n• Prezzo: ${activeModalVehicle.price}`;
+        
+        const tempInput = document.createElement('textarea');
+        tempInput.value = textToCopy;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+
+        showToast('Dati copiati per Discord!', 'success');
+    }
+
+    function exportStoreData() {
+        const backup = { settings, vehicles };
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "impero_romano_store_backup.json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+        showToast('Backup scaricato!', 'success');
+    }
+
+    function resetDefaultData() {
+        if (!isAdminLoggedIn) return;
+        if (confirm("Vuoi davvero ripristinare i dati di default su Firebase?")) {
+            settings = { ...defaultSettings };
+            vehicles = [...defaultVehicles];
+            saveSettingsToFirebase();
+            saveVehiclesToFirebase();
+            showToast('Database ripristinato ai valori iniziali.', 'info');
+        }
+    }
+
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        const icon = type === 'success' ? 'fa-circle-check text-emerald-400' : (type === 'error' ? 'fa-circle-exclamation text-red-400' : 'fa-circle-info text-amber-400');
+
+        toast.className = 'bg-cardBg border border-white/15 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-sm font-medium pointer-events-auto transition-all duration-300';
+        toast.innerHTML = `<i class="fa-solid ${icon} text-base"></i> <span>${message}</span>`;
+
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(10px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 3200);
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+</script>
